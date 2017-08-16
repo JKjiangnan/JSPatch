@@ -187,10 +187,23 @@ typedef id (^JPTestObjectBlock)(NSDictionary *dict, UIView *view);
     return block;
 }
 
+- (ISTestBlock)funcReturnJSBlock:(ISTestBlock)jsblock
+{
+    return jsblock;
+}
+
 - (void)callBlockWithStringAndInt:(id(^)(NSString *str, int num))block
 {
     id ret = block(@"stringFromOC", 42);
     self.callBlockWithStringAndIntReturnValuePassed = [ret isEqualToString:@"succ"];
+}
+
+- (void)callBlockDelay:(id(^)(NSString *str, int num))block
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        id ret = block(@"stringFromOC", 42);
+        self.callBlockWithStringAndIntReturnValuePassed = [ret isEqualToString:@"succ"];
+    });
 }
 
 - (void)callBlockWithArrayAndView:(void(^)(NSArray *arr, UIView *view))block
@@ -215,6 +228,12 @@ typedef id (^JPTestObjectBlock)(NSDictionary *dict, UIView *view);
         return @"succ";
     };
     block(view, cbBlock);
+}
+
+- (void)callBlockWithDouble:(double(^)(double num))block
+{
+    double ret = block(4.2);
+    self.callBlockWithDoubleAndReturnDoublePassed = fabs(ret - 8.4) < 0.1;
 }
 
 #pragma mark - swizzle
